@@ -1,3 +1,6 @@
+merged android sharing changes from https://github.com/thejump/react-native-receive-sharing-intent
+
+
 # react-native-receive-sharing-intent
 
 A React Native plugin that enables React Native apps to receive sharing photos, videos, text, urls or any other file types from another app.
