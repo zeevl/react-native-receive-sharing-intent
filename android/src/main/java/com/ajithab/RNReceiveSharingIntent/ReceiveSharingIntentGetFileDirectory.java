@@ -10,6 +10,13 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 public class ReceiveSharingIntentGetFileDirectory {
 
 
@@ -47,11 +54,34 @@ public class ReceiveSharingIntentGetFileDirectory {
         if ("content".equalsIgnoreCase(uri.getScheme())) {
 
 
-            if (isGooglePhotosUri(uri)) {
-                return uri.getLastPathSegment();
-            }
+          if (isGooglePhotosUri(uri)) {
+            return uri.getLastPathSegment();
+          }
+          if (isGooglePhotosUriProvider(uri)) {
+            InputStream inputStream = null;
+            String filePath = null;
+            try {
+              inputStream = context.getContentResolver().openInputStream(uri);
+              File photoFile = createTemporalFileFrom(inputStream,context);
 
-            String[] projection = {
+              filePath = photoFile.getPath();
+              return filePath;
+            } catch (FileNotFoundException e) {
+
+            } catch (IOException e) {
+
+            } finally {
+              try {
+                if (inputStream != null) {
+                  inputStream.close();
+                }
+              } catch (IOException e) {
+                e.printStackTrace();
+              }
+            }
+          }
+
+          String[] projection = {
                     MediaStore.Images.Media.DATA
             };
             Cursor cursor = null;
@@ -71,6 +101,36 @@ public class ReceiveSharingIntentGetFileDirectory {
         return null;
     }
 
+
+  private static File createTemporalFileFrom(InputStream inputStream,Context context) throws IOException {
+    File targetFile = null;
+
+    if (inputStream != null) {
+      int read;
+      byte[] buffer = new byte[8 * 1024];
+
+      targetFile = createTemporalFile(context);
+      OutputStream outputStream = new FileOutputStream(targetFile);
+
+      while ((read = inputStream.read(buffer)) != -1) {
+        outputStream.write(buffer, 0, read);
+      }
+      outputStream.flush();
+
+      try {
+        outputStream.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+    }
+
+    return targetFile;
+  }
+
+  private static File createTemporalFile(Context context) {
+    return new File(context.getCacheDir(), "tempPicture.jpg");
+  }
+
     public static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());
     }
@@ -83,8 +143,12 @@ public class ReceiveSharingIntentGetFileDirectory {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
-    public static boolean isGooglePhotosUri(Uri uri) {
-        return "com.google.android.apps.photos.content".equals(uri.getAuthority());
-    }
+  public static boolean isGooglePhotosUri(Uri uri) {
+    return "com.google.android.apps.photos.content".equals(uri.getAuthority());
+  }
+
+  public static boolean isGooglePhotosUriProvider(Uri uri) {
+      return "com.google.android.apps.photos.contentprovider".equals(uri.getAuthority());
+  }
 
 }
