@@ -24,6 +24,11 @@ public class ReceiveSharingIntentGetFileDirectory {
     public static String getFilePath(Context context, Uri uri) {
         String selection = null;
         String[] selectionArgs = null;
+
+        if (uri == null) {
+          return null;
+        }
+
         // Uri is different in versions after KITKAT (Android 4.4), we need to
         if (Build.VERSION.SDK_INT >= 19 && DocumentsContract.isDocumentUri(context.getApplicationContext(), uri)) {
             if (isExternalStorageDocument(uri)) {
@@ -51,9 +56,8 @@ public class ReceiveSharingIntentGetFileDirectory {
                 };
             }
         }
+        
         if ("content".equalsIgnoreCase(uri.getScheme())) {
-
-
           if (isGooglePhotosUri(uri)) {
             return uri.getLastPathSegment();
           }
