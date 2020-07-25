@@ -178,7 +178,9 @@ class ReceiveSharingIntent: NSObject {
     
     @objc
     func clearFileNames(){
-
+        let appDomain = Bundle.main.bundleIdentifier!
+        UserDefaults.standard.removePersistentDomain(forName: appDomain)
+        UserDefaults.standard.synchronize()
         print("clearFileNames");
     }
     
