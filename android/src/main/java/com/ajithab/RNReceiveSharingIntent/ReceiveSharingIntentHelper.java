@@ -83,6 +83,8 @@ public class ReceiveSharingIntentHelper {
         if(Objects.equals(intent.getAction(), Intent.ACTION_SEND)){
             WritableMap file = new WritableNativeMap();
             Uri contentUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
+            if (contentUri == null) return null;
+
             String filePath =   ReceiveSharingIntentGetFileDirectory.getFilePath(context, contentUri);
             if(filePath != null){
                 file.putString("fileName", getFileName(filePath));
